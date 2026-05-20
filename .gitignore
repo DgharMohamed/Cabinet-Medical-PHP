@@ -1,0 +1,29 @@
+# Fichier .gitignore - Projet Cabinet Medical Dr. Dghar Mohamed
+
+# Fichiers de configuration sensibles
+.env
+.env.local
+.env.development
+.env.production
+
+# Logs et emails logs local
+*.log
+emails_log.html
+
+# Uploads (medical documents)
+uploads/*
+!uploads/.gitkeep
+!uploads/temp/
+!uploads/temp/.gitkeep
+
+# Fichiers systeme
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE et editeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
