@@ -1,0 +1,268 @@
+<?php
+// Page de l'administrateur pour créer manuellement un rendez-vous (patient, service, date, créneau horaire)
+
+// Vérifier l'authentification
+session_start();
+if (!isset($_SESSION['logged']) || $_SESSION['logged'] !== true) {
+    header('Location: login.php');
+    exit;
+}
+
+// Générer le jeton CSRF
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrfToken = $_SESSION['csrf_token'];
+
+// Connexion à la base de données
+require_once __DIR__ . '/../config/Database.php';
+
+$database = new DatabaseConnection();
+$databaseConnection = $database->getConnection();
+
+// Récupérer la liste des services et des créneaux horaires
+$allServices = $databaseConnection->query("SELECT * FROM services")->fetchAll(PDO::FETCH_ASSOC);
+$allTimeSlots = $databaseConnection->query("SELECT * FROM time_slots ORDER BY FIELD(day_of_week, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'), start_time")->fetchAll(PDO::FETCH_ASSOC);
+
+// Configurer la langue et charger les traductions
+$language = $_COOKIE['lang'] ?? 'fr';
+if ($language !== 'ar' && $language !== 'fr') {
+    $language = 'fr';
+}
+$textDirection = ($language === 'ar') ? 'rtl' : 'ltr';
+
+$allTranslations = require __DIR__ . '/../lang/translations.php';
+$translation = $allTranslations;
+
+$errorMessage = '';
+$successMessage = '';
+
+// Noms des jours pour l'affichage selon la langue
+$daysFrench = [
+    'Monday' => 'Lundi', 'Tuesday' => 'Mardi', 'Wednesday' => 'Mercredi',
+    'Thursday' => 'Jeudi', 'Friday' => 'Vendredi', 'Saturday' => 'Samedi', 'Sunday' => 'Dimanche'
+];
+$daysArabic = [
+    'Monday' => 'الإثنين', 'Tuesday' => 'الثلاثاء', 'Wednesday' => 'الأربعاء',
+    'Thursday' => 'الخميس', 'Friday' => 'الجمعة', 'Saturday' => 'السبت', 'Sunday' => 'الأحد'
+];
+$dayNames = ($language === 'ar') ? $daysArabic : $daysFrench;
+
+// Traiter la soumission du formulaire de création de rendez-vous
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Vérifier le jeton CSRF
+    $submittedToken = $_POST['csrf_token'] ?? '';
+    if (empty($submittedToken) || $submittedToken !== ($_SESSION['csrf_token'] ?? '')) {
+        header('HTTP/1.1 403 Forbidden');
+        echo "CSRF token validation failed.";
+        exit;
+    }
+
+    // Extraire les données saisies
+    $patientName = trim($_POST['name'] ?? '');
+    $patientCni = trim($_POST['cni'] ?? '');
+    $patientEmail = trim($_POST['email'] ?? '');
+    $patientPhone = trim($_POST['phone'] ?? '');
+    $selectedServiceId = intval($_POST['service_id'] ?? 0);
+    $selectedDate = trim($_POST['appointment_date'] ?? '');
+    $selectedSlotId = intval($_POST['time_slot_id'] ?? 0);
+    $patientMessage = trim($_POST['message'] ?? '');
+
+    // Valider les champs obligatoires
+    if (empty($patientName) || empty($patientPhone) || empty($selectedServiceId) || empty($selectedDate) || empty($selectedSlotId)) {
+        $errorMessage = $translation[$language]['create_error'];
+    } else {
+        // Valider le créneau horaire sélectionné
+        $slotDetailQuery = $databaseConnection->prepare("SELECT day_of_week, max_patients FROM time_slots WHERE id = :id");
+        $slotDetailQuery->execute(['id' => $selectedSlotId]);
+        $slotDetailsRow = $slotDetailQuery->fetch(PDO::FETCH_ASSOC);
+
+        if (!$slotDetailsRow) {
+            $errorMessage = ($language === 'ar') ? "الوقت المحدد غير صالح." : "Le créneau horaire sélectionné est invalide.";
+        } else {
+            // S'assurer que le jour de la semaine correspond au créneau
+            $selectedDayOfWeek = date('l', strtotime($selectedDate));
+            if (strcasecmp($selectedDayOfWeek, $slotDetailsRow['day_of_week']) !== 0) {
+                $errorMessage = ($language === 'ar')
+                    ? "تاريخ الموعد لا يتطابق مع اليوم المحدد لهذا التوقيت."
+                    : "La date choisie ne correspond pas au jour de la semaine de ce créneau.";
+            } else {
+                try {
+                    // Démarrer une transaction pour la création du rendez-vous
+                    $databaseConnection->beginTransaction();
+
+                    // Vérifier la capacité maximale du créneau (avec verrouillage)
+                    $bookingCheckQuery = $databaseConnection->prepare("SELECT COUNT(*) FROM appointments WHERE appointment_date = :date AND time_slot_id = :slot_id AND status != 'canceled' FOR UPDATE");
+                    $bookingCheckQuery->execute(['date' => $selectedDate, 'slot_id' => $selectedSlotId]);
+                    $currentBookingCount = $bookingCheckQuery->fetchColumn();
+
+                    $maximumCapacity = $slotDetailsRow['max_patients'];
+
+                    if ($currentBookingCount >= $maximumCapacity) {
+                        $databaseConnection->rollBack();
+                        $errorMessage = $translation[$language]['slot_full'];
+                    } else {
+                        // Générer un numéro de référence unique
+                        $referenceNumber = '';
+                        $generationAttempts = 0;
+                        while ($generationAttempts < 10) {
+                            $candidateReference = 'APT-' . date('Ymd') . '-' . random_int(1000, 9999);
+                            $referenceCheckQuery = $databaseConnection->prepare("SELECT COUNT(*) FROM appointments WHERE reference_number = ?");
+                            $referenceCheckQuery->execute([$candidateReference]);
+                            if (intval($referenceCheckQuery->fetchColumn()) === 0) {
+                                $referenceNumber = $candidateReference;
+                                break;
+                            }
+                            $generationAttempts++;
+                        }
+                        if (empty($referenceNumber)) {
+                            $referenceNumber = 'APT-' . date('Ymd') . '-' . random_int(1000, 9999) . '-' . bin2hex(random_bytes(2));
+                        }
+
+                        // Générer un jeton d'accès public
+                        $publicAccessToken = bin2hex(random_bytes(32));
+
+                        $serviceName = '';
+                        foreach ($allServices as $serviceItem) {
+                            if ($serviceItem['id'] == $selectedServiceId) {
+                                $serviceName = $serviceItem['name'];
+                                break;
+                            }
+                        }
+
+                        // Insérer le nouveau rendez-vous confirmé
+                        $insertQuery = $databaseConnection->prepare("INSERT INTO appointments (name, cni, email, phone, service_type, appointment_date, service_id, time_slot_id, message, reference_number, public_token, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', NOW())");
+                        $insertQuery->execute([$patientName, $patientCni, $patientEmail, $patientPhone, $serviceName, $selectedDate, $selectedServiceId, $selectedSlotId, $patientMessage, $referenceNumber, $publicAccessToken]);
+                        $newAppointmentId = $databaseConnection->lastInsertId();
+
+                        $databaseConnection->commit();
+
+                        // Envoyer un e-mail de confirmation au patient s'il a fourni son adresse
+                        if (!empty($patientEmail)) {
+                            $qrCodeImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode($referenceNumber);
+                            $recipientEmail = $patientEmail;
+                            $emailSubject = "Appointment Confirmation - Cabinet Médical";
+                            $escapedPatientName = htmlspecialchars($patientName, ENT_QUOTES, 'UTF-8');
+                            $escapedServiceName = htmlspecialchars($serviceName, ENT_QUOTES, 'UTF-8');
+                            $escapedDate = htmlspecialchars($selectedDate, ENT_QUOTES, 'UTF-8');
+
+                            $emailContent = "
+                                <html>
+                                <body style='font-family: Arial, sans-serif;'>
+                                    <h2>Appointment Confirmation</h2>
+                                    <p>Dear {$escapedPatientName},</p>
+                                    <p>Your appointment has been confirmed.</p>
+                                    <p><strong>Reference:</strong> " . htmlspecialchars($referenceNumber) . "</p>
+                                    <p><strong>Date:</strong> {$escapedDate}</p>
+                                    <p><strong>Service:</strong> {$escapedServiceName}</p>
+                                    <p>Your QR Code:</p>
+                                    <p><img src='$qrCodeImageUrl' alt='QR Code' /></p>
+                                    <p>Thank you for choosing our clinic.</p>
+                                </body>
+                                </html>
+                            ";
+                            $emailHeaders = "MIME-Version: 1.0\r\n";
+                            $emailHeaders .= "Content-type:text/html;charset=UTF-8\r\n";
+                            $emailHeaders .= "From: cabinet@dr-dghar.ma\r\n";
+                            @mail($recipientEmail, $emailSubject, $emailContent, $emailHeaders);
+                        }
+
+                        // Rediriger vers le tableau de bord
+                        header('Location: index.php');
+                        exit;
+                    }
+                } catch (Exception $exception) {
+                    // Gérer les erreurs et annuler la transaction
+                    if ($databaseConnection->inTransaction()) {
+                        $databaseConnection->rollBack();
+                    }
+                    error_log("Error creating manual appointment: " . $exception->getMessage());
+                    $errorMessage = $translation[$language]['create_error'];
+                }
+            }
+        }
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="<?php echo $language; ?>" dir="<?php echo $textDirection; ?>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($translation[$language]['create_title']); ?></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <style>
+        .form-wrap { max-width: 600px; margin: 40px auto; padding: 32px; background: white; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+        .form-wrap h1 { font-size: 22px; font-weight: 700; color: #1B4D3E; margin-bottom: 24px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; color: #4a5c4a; margin-bottom: 6px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #d0dbd0; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #1B4D3E; box-shadow: 0 0 0 3px rgba(27,77,62,0.1); }
+        .btn-submit { background: #1B4D3E; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; }
+        .btn-submit:hover { background: #143a2e; }
+        .back-link { display: inline-block; margin-top: 16px; color: #1B4D3E; text-decoration: none; font-size: 14px; }
+        .error-msg { background: #fef2f2; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #fecaca; }
+    </style>
+</head>
+<body>
+    <div class="form-wrap">
+        <h1><?php echo htmlspecialchars($translation[$language]['create_heading']); ?></h1>
+
+        <?php if ($errorMessage): ?>
+            <div class="error-msg"><i class="fa-solid fa-circle-exclamation"></i> <?php echo htmlspecialchars($errorMessage); ?></div>
+        <?php endif; ?>
+
+        <form method="post">
+            <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+            <div class="form-group">
+                <label for="name"><?php echo htmlspecialchars($translation[$language]['create_name']); ?></label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="cni"><?php echo htmlspecialchars($translation[$language]['create_cni']); ?></label>
+                <input type="text" id="cni" name="cni">
+            </div>
+            <div class="form-group">
+                <label for="email"><?php echo htmlspecialchars($translation[$language]['create_email']); ?></label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="phone"><?php echo htmlspecialchars($translation[$language]['create_phone']); ?></label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="service_id"><?php echo htmlspecialchars($translation[$language]['create_service']); ?></label>
+                <select id="service_id" name="service_id" required>
+                    <option value="">--</option>
+                    <?php foreach ($allServices as $serviceItem): ?>
+                        <option value="<?php echo $serviceItem['id']; ?>"><?php echo htmlspecialchars($serviceItem['name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="appointment_date"><?php echo htmlspecialchars($translation[$language]['create_date']); ?></label>
+                <input type="date" id="appointment_date" name="appointment_date" required>
+            </div>
+            <div class="form-group">
+                <label for="time_slot_id"><?php echo htmlspecialchars($translation[$language]['create_time_slot']); ?></label>
+                <select id="time_slot_id" name="time_slot_id" required>
+                    <option value=""><?php echo ($language === 'ar') ? "الرجاء اختيار التاريخ أولاً" : "Veuillez d'abord choisir une date"; ?></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="message"><?php echo htmlspecialchars($translation[$language]['create_message']); ?></label>
+                <textarea id="message" name="message" rows="3" style="width: 100%; padding: 10px 14px; border: 1px solid #d0dbd0; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box;"></textarea>
+            </div>
+            <button type="submit" class="btn-submit"><?php echo htmlspecialchars($translation[$language]['create_submit']); ?></button>
+        </form>
+
+        <a href="index.php" class="back-link"><i class="fa-solid fa-arrow-left"></i> <?php echo htmlspecialchars($translation[$language]['create_back']); ?></a>
+    </div>
+
+    <script src="../assets/js/admin.js"></script>
+</body>
+</html>
