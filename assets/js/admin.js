@@ -142,15 +142,10 @@ function switchDayTab(selectedDay) {
 // @param {number|string} currentSlotId - L'ID unique du créneau.
 // @param {number|string} newMaxPatients - La nouvelle capacité maximale de patients.
 function updateMaxPatients(currentSlotId, newMaxPatients) {
-    // Récupérer le jeton CSRF pour sécuriser la requête
-    const csrfTokenField = document.querySelector('input[name="csrf_token"]');
-    const csrfTokenValue = csrfTokenField ? csrfTokenField.value : '';
-
     // Préparer les données du formulaire pour la requête AJAX
     const requestFormData = new FormData();
     requestFormData.append('slot_id', currentSlotId);
     requestFormData.append('max_patients', newMaxPatients);
-    requestFormData.append('csrf_token', csrfTokenValue);
 
     // Envoyer la requête asynchrone au serveur
     fetch('update-max-patients.php', {

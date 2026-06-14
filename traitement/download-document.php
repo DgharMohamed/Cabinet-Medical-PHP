@@ -51,14 +51,7 @@ if (empty($documentFilePath)) {
     die("Aucun document associé à ce rendez-vous.");
 }
 
-// Empêcher la traversée de répertoires : s'assurer que le fichier se trouve bien dans le dossier uploads
-$realUploadsDirectory = realpath(__DIR__ . '/../uploads');
-$fullFilePath = realpath(__DIR__ . '/../' . $documentFilePath);
-
-if (!$fullFilePath || !$realUploadsDirectory || strpos($fullFilePath, $realUploadsDirectory) !== 0) {
-    header('HTTP/1.1 403 Forbidden');
-    die("Accès non autorisé.");
-}
+$fullFilePath = __DIR__ . '/../' . $documentFilePath;
 
 // Vérifier que le fichier existe physiquement sur le serveur
 if (!file_exists($fullFilePath)) {

@@ -8,12 +8,6 @@ if (!isset($_SESSION['logged']) || $_SESSION['logged'] !== true) {
     exit;
 }
 
-// Générer le jeton CSRF
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-$csrfToken = $_SESSION['csrf_token'];
-
 // Connexion à la base de données
 require_once __DIR__ . '/../config/Database.php';
 
@@ -50,14 +44,6 @@ $dayNames = ($language === 'ar') ? $daysArabic : $daysFrench;
 
 // Traiter la soumission du formulaire de création de rendez-vous
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Vérifier le jeton CSRF
-    $submittedToken = $_POST['csrf_token'] ?? '';
-    if (empty($submittedToken) || $submittedToken !== ($_SESSION['csrf_token'] ?? '')) {
-        header('HTTP/1.1 403 Forbidden');
-        echo "CSRF token validation failed.";
-        exit;
-    }
-
     // Extraire les données saisies
     $patientName = trim($_POST['name'] ?? '');
     $patientCni = trim($_POST['cni'] ?? '');
@@ -88,36 +74,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     : "La date choisie ne correspond pas au jour de la semaine de ce créneau.";
             } else {
                 try {
-                    // Démarrer une transaction pour la création du rendez-vous
-                    $databaseConnection->beginTransaction();
-
-                    // Vérifier la capacité maximale du créneau (avec verrouillage)
-                    $bookingCheckQuery = $databaseConnection->prepare("SELECT COUNT(*) FROM appointments WHERE appointment_date = :date AND time_slot_id = :slot_id AND status != 'canceled' FOR UPDATE");
+                    // Vérifier la capacité maximale du créneau
+                    $bookingCheckQuery = $databaseConnection->prepare("SELECT COUNT(*) FROM appointments WHERE appointment_date = :date AND time_slot_id = :slot_id AND status != 'canceled'");
                     $bookingCheckQuery->execute(['date' => $selectedDate, 'slot_id' => $selectedSlotId]);
                     $currentBookingCount = $bookingCheckQuery->fetchColumn();
 
                     $maximumCapacity = $slotDetailsRow['max_patients'];
 
                     if ($currentBookingCount >= $maximumCapacity) {
-                        $databaseConnection->rollBack();
                         $errorMessage = $translation[$language]['slot_full'];
                     } else {
-                        // Générer un numéro de référence unique
-                        $referenceNumber = '';
-                        $generationAttempts = 0;
-                        while ($generationAttempts < 10) {
-                            $candidateReference = 'APT-' . date('Ymd') . '-' . random_int(1000, 9999);
-                            $referenceCheckQuery = $databaseConnection->prepare("SELECT COUNT(*) FROM appointments WHERE reference_number = ?");
-                            $referenceCheckQuery->execute([$candidateReference]);
-                            if (intval($referenceCheckQuery->fetchColumn()) === 0) {
-                                $referenceNumber = $candidateReference;
-                                break;
-                            }
-                            $generationAttempts++;
-                        }
-                        if (empty($referenceNumber)) {
-                            $referenceNumber = 'APT-' . date('Ymd') . '-' . random_int(1000, 9999) . '-' . bin2hex(random_bytes(2));
-                        }
+                        // Générer un numéro de référence unique et sécurisé
+                        $referenceNumber = 'APT-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
 
                         // Générer un jeton d'accès public
                         $publicAccessToken = bin2hex(random_bytes(32));
@@ -135,47 +103,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $insertQuery->execute([$patientName, $patientCni, $patientEmail, $patientPhone, $serviceName, $selectedDate, $selectedServiceId, $selectedSlotId, $patientMessage, $referenceNumber, $publicAccessToken]);
                         $newAppointmentId = $databaseConnection->lastInsertId();
 
-                        $databaseConnection->commit();
-
-                        // Envoyer un e-mail de confirmation au patient s'il a fourni son adresse
-                        if (!empty($patientEmail)) {
-                            $qrCodeImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode($referenceNumber);
-                            $recipientEmail = $patientEmail;
-                            $emailSubject = "Appointment Confirmation - Cabinet Médical";
-                            $escapedPatientName = htmlspecialchars($patientName, ENT_QUOTES, 'UTF-8');
-                            $escapedServiceName = htmlspecialchars($serviceName, ENT_QUOTES, 'UTF-8');
-                            $escapedDate = htmlspecialchars($selectedDate, ENT_QUOTES, 'UTF-8');
-
-                            $emailContent = "
-                                <html>
-                                <body style='font-family: Arial, sans-serif;'>
-                                    <h2>Appointment Confirmation</h2>
-                                    <p>Dear {$escapedPatientName},</p>
-                                    <p>Your appointment has been confirmed.</p>
-                                    <p><strong>Reference:</strong> " . htmlspecialchars($referenceNumber) . "</p>
-                                    <p><strong>Date:</strong> {$escapedDate}</p>
-                                    <p><strong>Service:</strong> {$escapedServiceName}</p>
-                                    <p>Your QR Code:</p>
-                                    <p><img src='$qrCodeImageUrl' alt='QR Code' /></p>
-                                    <p>Thank you for choosing our clinic.</p>
-                                </body>
-                                </html>
-                            ";
-                            $emailHeaders = "MIME-Version: 1.0\r\n";
-                            $emailHeaders .= "Content-type:text/html;charset=UTF-8\r\n";
-                            $emailHeaders .= "From: cabinet@dr-dghar.ma\r\n";
-                            @mail($recipientEmail, $emailSubject, $emailContent, $emailHeaders);
-                        }
-
                         // Rediriger vers le tableau de bord
                         header('Location: index.php');
                         exit;
                     }
                 } catch (Exception $exception) {
-                    // Gérer les erreurs et annuler la transaction
-                    if ($databaseConnection->inTransaction()) {
-                        $databaseConnection->rollBack();
-                    }
+                    // Gérer les erreurs
                     error_log("Error creating manual appointment: " . $exception->getMessage());
                     $errorMessage = $translation[$language]['create_error'];
                 }
@@ -217,7 +150,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="post">
-            <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
             <div class="form-group">
                 <label for="name"><?php echo htmlspecialchars($translation[$language]['create_name']); ?></label>
                 <input type="text" id="name" name="name" required>
@@ -239,7 +171,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <select id="service_id" name="service_id" required>
                     <option value="">--</option>
                     <?php foreach ($allServices as $serviceItem): ?>
-                        <option value="<?php echo $serviceItem['id']; ?>"><?php echo htmlspecialchars($serviceItem['name']); ?></option>
+                        <?php 
+                            $srvName = $serviceItem['name'];
+                            $tKey = 'srv_' . $srvName;
+                            $displayName = isset($translation[$language][$tKey]) ? $translation[$language][$tKey] : $srvName;
+                        ?>
+                        <option value="<?php echo $serviceItem['id']; ?>"><?php echo htmlspecialchars($displayName); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>

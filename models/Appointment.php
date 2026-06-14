@@ -27,45 +27,6 @@ class Appointment {
         $this->databaseConnection = $database;
     }
 
-    // Insérer un nouveau rendez-vous dans la base de données
-    public function createAppointment() {
-        $sqlQuery = "INSERT INTO " . $this->tableName . " 
-                    (name, email, phone, cni, service_type, appointment_date, message, service_id, time_slot_id, medical_document, reference_number, public_token, created_at)
-                    VALUES (:name, :email, :phone, :cni, :service_type, :appointment_date, :message, :service_id, :time_slot_id, :medical_document, :reference_number, :public_token, NOW())";
-
-        $preparedStatement = $this->databaseConnection->prepare($sqlQuery);
-
-        return $preparedStatement->execute([
-            ':name' => $this->name,
-            ':email' => $this->email,
-            ':phone' => $this->phone,
-            ':cni' => $this->cni,
-            ':service_type' => $this->service_type,
-            ':appointment_date' => $this->appointment_date,
-            ':message' => $this->message,
-            ':service_id' => $this->service_id,
-            ':time_slot_id' => $this->time_slot_id,
-            ':medical_document' => $this->medical_document,
-            ':reference_number' => $this->reference_number,
-            ':public_token' => $this->public_token
-        ]);
-    }
-
-    // Récupérer tous les rendez-vous avec les détails du service et du créneau horaire
-    public function fetchAllAppointments() {
-
-        // Jointure avec les tables services et time_slots pour obtenir les informations complètes
-        $sqlQuery = "SELECT a.*, s.name AS service_name, ts.start_time AS slot_start, ts.end_time AS slot_end 
-                     FROM " . $this->tableName . " a 
-                     LEFT JOIN services s ON a.service_id = s.id 
-                     LEFT JOIN time_slots ts ON a.time_slot_id = ts.id 
-                     ORDER BY a.created_at DESC";
-                     
-        $preparedStatement = $this->databaseConnection->query($sqlQuery);
-        
-        return $preparedStatement->fetchAll(PDO::FETCH_ASSOC);
-    }
-
     // Récupérer un rendez-vous par son identifiant, avec vérification optionnelle du jeton d'accès
     public function fetchAppointmentById() {
         $sqlQuery = "SELECT a.*, s.name AS service_name 
@@ -120,34 +81,6 @@ class Appointment {
         
         return $preparedStatement->execute([
             ':status' => $this->status,
-            ':id' => $this->id
-        ]);
-    }
-
-    // Mettre à jour toutes les informations d'un rendez-vous existant
-    public function updateAppointment() {
-        $sqlQuery = "UPDATE " . $this->tableName . "
-                     SET name = :name, email = :email, phone = :phone, cni = :cni,
-                         service_type = :service_type, appointment_date = :appointment_date,
-                         message = :message,
-                         service_id = :service_id, time_slot_id = :time_slot_id,
-                         medical_document = :medical_document, reference_number = :reference_number
-                     WHERE id = :id";
-
-        $preparedStatement = $this->databaseConnection->prepare($sqlQuery);
-
-        return $preparedStatement->execute([
-            ':name' => $this->name,
-            ':email' => $this->email,
-            ':phone' => $this->phone,
-            ':cni' => $this->cni,
-            ':service_type' => $this->service_type,
-            ':appointment_date' => $this->appointment_date,
-            ':message' => $this->message,
-            ':service_id' => $this->service_id,
-            ':time_slot_id' => $this->time_slot_id,
-            ':medical_document' => $this->medical_document,
-            ':reference_number' => $this->reference_number,
             ':id' => $this->id
         ]);
     }

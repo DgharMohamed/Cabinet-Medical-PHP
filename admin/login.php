@@ -29,7 +29,7 @@ if (isset($_SESSION['logged']) && $_SESSION['logged'] === true) {
 $allTranslations = require __DIR__ . '/../lang/translations.php';
 $translation = $allTranslations;
 
-require_once __DIR__ . '/../config/admin-config.php';
+require_once __DIR__ . '/../config/Database.php';
 
 $loginError = '';
 
@@ -37,14 +37,25 @@ $loginError = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $submittedPassword = $_POST['pass'] ?? '';
 
-    // Vérifier le mot de passe et sécuriser la session
-    if (password_verify($submittedPassword, $hashedAdminPassword)) {
-        session_regenerate_id(true);
-        $_SESSION['logged'] = true;
-        header('Location: index.php');
-        exit;
-    } else {
-        $loginError = $translation[$language]['login_error'];
+    try {
+        $database = new DatabaseConnection();
+        $db = $database->getConnection();
+        // On vérifie le mot de passe du compte par défaut 'admin'
+        $stmt = $db->prepare("SELECT id, password FROM admins WHERE username = 'admin'");
+        $stmt->execute();
+        $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Vérifier le mot de passe
+        if ($admin && password_verify($submittedPassword, $admin['password'])) {
+            $_SESSION['logged'] = true;
+            $_SESSION['admin_id'] = $admin['id'];
+            header('Location: index.php');
+            exit;
+        } else {
+            $loginError = $translation[$language]['login_error'];
+        }
+    } catch (PDOException $e) {
+        $loginError = "Erreur de base de données."; 
     }
 }
 ?>

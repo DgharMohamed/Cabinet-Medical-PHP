@@ -7,11 +7,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Générer un jeton CSRF pour protéger les formulaires
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
 // Gérer le changement de langue
 $language = $_COOKIE['lang'] ?? 'fr';
 if (isset($_GET['set_lang'])) {

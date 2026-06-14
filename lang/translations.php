@@ -42,11 +42,18 @@ return [
         's6_title' => 'Conseils santé',
         's6_desc' => 'Accompagnement nutritionnel et conseils pour un mode de vie sain.',
 
+        'srv_Consultation Générale' => 'Consultation Générale',
+        'srv_Suivi de Maladie Chronique' => 'Suivi de Maladie Chronique',
+        'srv_Bilan de Santé' => 'Bilan de Santé',
+        'srv_Visite à Domicile' => 'Visite à Domicile',
+        'srv_Consultation Pédiatrique' => 'Consultation Pédiatrique',
+        'srv_Conseil en Nutrition' => 'Conseil en Nutrition',
+
         // ===== WHY CHOOSE US =====
         'why_title' => 'Pourquoi nous choisir ?',
         'why_subtitle' => 'Votre santé entre de bonnes mains',
         'w1_label' => 'Disponibilité',
-        'w1_desc' => 'Une assistance pour les urgences médicales à toute heure.',
+        'w1_desc' => 'Une prise en charge médicale rapide, 6 jours sur 7.',
         'w2_label' => 'Qualité',
         'w2_desc' => 'Des soins basés sur les dernières recommandations médicales.',
         'w3_label' => 'Proximité',
@@ -280,11 +287,18 @@ return [
         's6_title' => 'نصائح صحية',
         's6_desc' => 'مواكبة غذائية ونصائح لنمط حياة صحي.',
 
+        'srv_Consultation Générale' => 'استشارة عامة',
+        'srv_Suivi de Maladie Chronique' => 'متابعة مرض مزمن',
+        'srv_Bilan de Santé' => 'فحص صحي شامل',
+        'srv_Visite à Domicile' => 'زيارة منزلية',
+        'srv_Consultation Pédiatrique' => 'استشارة طب الأطفال',
+        'srv_Conseil en Nutrition' => 'نصائح في التغذية',
+
         // ===== WHY CHOOSE US =====
         'why_title' => 'لماذا تختارنا ؟',
         'why_subtitle' => 'صحتكم في أيدٍ أمينة',
         'w1_label' => 'التوفر',
-        'w1_desc' => 'مساعدة في حالات الطوارئ الطبية على مدار الساعة.',
+        'w1_desc' => 'رعاية طبية سريعة ومتاحة 6 أيام في الأسبوع.',
         'w2_label' => 'الجودة',
         'w2_desc' => 'رعاية طبية مبنية على أحدث التوصيات الطبية.',
         'w3_label' => 'القرب',

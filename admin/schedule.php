@@ -9,22 +9,6 @@ if (!isset($_SESSION['logged']) || $_SESSION['logged'] !== true) {
     exit;
 }
 
-// Générer le jeton CSRF
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-$csrfToken = $_SESSION['csrf_token'];
-
-// Valider le jeton CSRF pour les requêtes POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $submittedToken = $_POST['csrf_token'] ?? '';
-    if (empty($submittedToken) || $submittedToken !== ($_SESSION['csrf_token'] ?? '')) {
-        header('HTTP/1.1 403 Forbidden');
-        echo "CSRF token validation failed.";
-        exit;
-    }
-}
-
 // Connexion à la base de données
 require_once __DIR__ . '/../config/Database.php';
 
@@ -228,7 +212,6 @@ $allExceptions = $exceptionsQuery->fetchAll(PDO::FETCH_ASSOC);
                 </h2>
                 <form method="post" action="schedule.php">
                     <input type="hidden" name="action" value="add">
-                    <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                     <div class="form-group">
                         <label><?php echo htmlspecialchars($translation[$language]['day']); ?></label>
                         <select name="day_of_week" id="day_of_week" required>
@@ -320,7 +303,6 @@ $allExceptions = $exceptionsQuery->fetchAll(PDO::FETCH_ASSOC);
                 </h2>
                 <form method="post" action="schedule.php">
                     <input type="hidden" name="action" value="add_exception">
-                    <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                     <div class="form-group">
                         <label><?php echo htmlspecialchars($translation[$language]['date']); ?></label>
                         <input type="date" name="exception_date" required>
@@ -401,13 +383,11 @@ $allExceptions = $exceptionsQuery->fetchAll(PDO::FETCH_ASSOC);
 
     <form id="deleteForm" method="post" action="schedule.php" style="display:none;">
         <input type="hidden" name="action" value="delete">
-        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
         <input type="hidden" name="delete_id" id="deleteIdInput" value="">
     </form>
 
     <form id="deleteExcForm" method="post" action="schedule.php" style="display:none;">
         <input type="hidden" name="action" value="delete_exception">
-        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
         <input type="hidden" name="delete_id" id="deleteExcIdInput" value="">
     </form>
 

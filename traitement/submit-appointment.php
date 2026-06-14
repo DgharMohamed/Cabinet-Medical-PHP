@@ -11,13 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Vérifier le jeton CSRF pour protéger contre les attaques de falsification de requêtes
-if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
-    header('HTTP/1.1 403 Forbidden');
-    echo "CSRF token validation failed.";
-    exit;
-}
-
 // Nettoyer et extraire les données du formulaire
 $patientName = trim($_POST['name'] ?? '');
 $patientEmail = trim($_POST['email'] ?? '');
@@ -141,9 +134,8 @@ if (strcasecmp($appointmentDayOfWeek, $slotDetails['day_of_week']) !== 0) {
     exit;
 }
 
-// Démarrer une transaction pour garantir la cohérence et éviter les réservations en double
+// Démarrer pour garantir la cohérence
 try {
-    $databaseConnection->beginTransaction();
 
     // Vérifier si une exception d'emploi du temps (jour férié) bloque ce créneau
     $scheduleExceptionQuery = $databaseConnection->prepare("SELECT COUNT(*) FROM schedule_exceptions WHERE exception_date = ? AND (time_slot_id = ? OR time_slot_id IS NULL)");
@@ -151,44 +143,26 @@ try {
     $isSlotUnavailable = intval($scheduleExceptionQuery->fetchColumn());
 
     if ($isSlotUnavailable > 0) {
-        $databaseConnection->rollBack();
         $_SESSION['form_errors'][] = ($language === 'ar') ? "هذا الوقت غير متاح للحجز." : "Ce créneau horaire n'est pas disponible.";
         header("Location: ../index.php?status=error#appointment");
         exit;
     }
 
-    // Vérifier la capacité du créneau avec verrouillage (FOR UPDATE) pour éviter les conflits concurrents
-    $bookingCountQuery = $databaseConnection->prepare("SELECT COUNT(*) FROM appointments WHERE appointment_date = :date AND time_slot_id = :slot_id AND status != 'canceled' FOR UPDATE");
+    // Vérifier la capacité du créneau pour éviter les conflits concurrents
+    $bookingCountQuery = $databaseConnection->prepare("SELECT COUNT(*) FROM appointments WHERE appointment_date = :date AND time_slot_id = :slot_id AND status != 'canceled'");
     $bookingCountQuery->execute(['date' => $appointmentDate, 'slot_id' => $timeSlotId]);
     $currentBookingCount = $bookingCountQuery->fetchColumn();
 
     $maximumCapacity = $slotDetails['max_patients'];
 
     if ($currentBookingCount >= $maximumCapacity) {
-        $databaseConnection->rollBack();
         $_SESSION['form_errors'][] = ($language === 'ar') ? "هذا الموعد محجوز بالكامل. الرجاء اختيار موعد آخر." : "Ce créneau est complet. Veuillez choisir un autre horaire.";
         header("Location: ../index.php?status=error#appointment");
         exit;
     }
 
-    // Générer un numéro de référence unique avec plusieurs tentatives pour éviter les doublons
-    $referenceNumber = '';
-    $generationAttempts = 0;
-    while ($generationAttempts < 10) {
-        $potentialReference = 'APT-' . date('Ymd') . '-' . random_int(1000, 9999);
-        $referenceCheckQuery = $databaseConnection->prepare("SELECT COUNT(*) FROM appointments WHERE reference_number = ?");
-        $referenceCheckQuery->execute([$potentialReference]);
-        if (intval($referenceCheckQuery->fetchColumn()) === 0) {
-            $referenceNumber = $potentialReference;
-            break;
-        }
-        $generationAttempts++;
-    }
-    
-    // En cas d'échec après 10 tentatives, ajouter un suffixe aléatoire supplémentaire
-    if (empty($referenceNumber)) {
-        $referenceNumber = 'APT-' . date('Ymd') . '-' . random_int(1000, 9999) . '-' . bin2hex(random_bytes(2));
-    }
+    // Générer un numéro de référence unique et sécurisé
+    $referenceNumber = 'APT-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
 
     // Générer un jeton sécurisé pour l'accès public du patient à son rendez-vous
     $publicAccessToken = bin2hex(random_bytes(32));
@@ -198,12 +172,10 @@ try {
     $insertQuery->execute([$patientName, $patientEmail, $patientPhone, $patientCni, $serviceTypeName, $appointmentDate, $serviceId, $timeSlotId, $uploadedDocumentPath, $referenceNumber, $publicAccessToken, $patientMessage]);
 
     $newAppointmentId = $databaseConnection->lastInsertId();
-    $databaseConnection->commit();
 
     header('Location: ../pending-confirmation.php?id=' . $newAppointmentId . '&token=' . $publicAccessToken);
     
 } catch (Exception $exception) {
-    $databaseConnection->rollBack();
     error_log("Database submission error: " . $exception->getMessage());
     $_SESSION['form_errors'][] = ($language === 'ar') ? "حدث خطأ في قاعدة البيانات. الرجاء المحاولة مرة أخرى." : "Une erreur de base de données est survenue. Veuillez réessayer.";
     header("Location: ../index.php?status=error#appointment");

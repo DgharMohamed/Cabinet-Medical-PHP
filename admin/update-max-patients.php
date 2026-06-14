@@ -20,14 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Récupérer les paramètres envoyés par le client
 $timeSlotId = intval($_POST['slot_id'] ?? 0);
 $maximumPatientCount = intval($_POST['max_patients'] ?? 0);
-$submittedCsrfToken = $_POST['csrf_token'] ?? '';
-
-// Valider le jeton CSRF
-if (empty($submittedCsrfToken) || $submittedCsrfToken !== ($_SESSION['csrf_token'] ?? '')) {
-    echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
-    exit;
-}
-
 // Vérifier la validité des paramètres
 if ($timeSlotId <= 0 || $maximumPatientCount <= 0) {
     echo json_encode(['success' => false, 'message' => 'Invalid parameters']);

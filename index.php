@@ -144,7 +144,7 @@ if ($trackStatus !== '') {
             <div class="why-grid">
                 <div class="why-card reveal">
                     <div class="why-icon"><i class="fa-solid fa-clock"></i></div>
-                    <h3 class="why-value" data-count="24/7">0</h3>
+                    <h3 class="why-value" data-count="6/7">0</h3>
                     <p class="why-label"><?php echo $translation[$language]['w1_label']; ?></p>
                     <p class="why-desc"><?php echo $translation[$language]['w1_desc']; ?></p>
                 </div>
@@ -319,7 +319,6 @@ if ($trackStatus !== '') {
                     <?php endif; ?>
 
                     <form action="traitement/submit-appointment.php" method="post" enctype="multipart/form-data" id="appointmentForm">
-                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
                         <div class="form-group">
                             <input type="text" name="name" class="form-input" placeholder=" " required>
                             <label><?php echo $translation[$language]['name_label']; ?></label>
@@ -343,7 +342,12 @@ if ($trackStatus !== '') {
                                 <select name="service_id" class="form-input" required id="serviceSelect">
                                     <option value="" disabled selected></option>
                                     <?php foreach ($allServices as $service): ?>
-                                        <option value="<?php echo $service['id']; ?>"><?php echo htmlspecialchars($service['name']); ?> (<?php echo number_format($service['price'], 2); ?> DH)</option>
+                                        <?php 
+                                            $srvName = $service['name'];
+                                            $tKey = 'srv_' . $srvName;
+                                            $displayName = isset($translation[$language][$tKey]) ? $translation[$language][$tKey] : $srvName;
+                                        ?>
+                                        <option value="<?php echo $service['id']; ?>"><?php echo htmlspecialchars($displayName); ?> (<?php echo number_format($service['price'], 2); ?> DH)</option>
                                     <?php endforeach; ?>
                                 </select>
                                 <label><?php echo $translation[$language]['service_label']; ?></label>

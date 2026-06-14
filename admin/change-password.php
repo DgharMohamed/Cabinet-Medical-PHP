@@ -9,12 +9,6 @@ if (!isset($_SESSION['logged']) || $_SESSION['logged'] !== true) {
     exit;
 }
 
-// Générer le jeton CSRF
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-$csrfToken = $_SESSION['csrf_token'];
-
 // Configurer la langue
 $language = $_COOKIE['lang'] ?? 'fr';
 if ($language !== 'ar' && $language !== 'fr') {
@@ -26,7 +20,7 @@ $textDirection = ($language === 'ar') ? 'rtl' : 'ltr';
 $allTranslations = require __DIR__ . '/../lang/translations.php';
 $translation = $allTranslations;
 
-require_once __DIR__ . '/../config/admin-config.php';
+require_once __DIR__ . '/../config/Database.php';
 
 $successMessage = '';
 $errorMessage = '';
@@ -34,41 +28,42 @@ $errorMessage = '';
 // Gérer la soumission du formulaire de changement de mot de passe
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // Vérifier le jeton CSRF
-    $submittedToken = $_POST['csrf_token'] ?? '';
-    if (empty($submittedToken) || $submittedToken !== ($_SESSION['csrf_token'] ?? '')) {
-        header('HTTP/1.1 403 Forbidden');
-        echo "CSRF token validation failed.";
-        exit;
-    }
-    
     $currentPassword = $_POST['current_password'] ?? '';
     $newPassword = $_POST['new_password'] ?? '';
     $confirmNewPassword = $_POST['confirm_password'] ?? '';
 
-    // Validation des mots de passe
-    if (!password_verify($currentPassword, $hashedAdminPassword)) {
-        $errorMessage = $translation[$language]['pass_err_current'];
-    } elseif ($newPassword !== $confirmNewPassword) {
-        $errorMessage = $translation[$language]['pass_err_match'];
-    } elseif (strlen($newPassword) < 6) {
-        $errorMessage = $translation[$language]['pass_err_short'];
-    } elseif ($currentPassword === $newPassword) {
-        $errorMessage = $translation[$language]['pass_err_same'];
-    } else {
+    try {
+        $database = new DatabaseConnection();
+        $db = $database->getConnection();
         
-        // Hasher le nouveau mot de passe
-        $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+        // ID de l'administrateur, on suppose 1 s'il n'est pas encore dans la session
+        $adminId = $_SESSION['admin_id'] ?? 1;
+        
+        $stmt = $db->prepare("SELECT password FROM admins WHERE id = :id");
+        $stmt->execute(['id' => $adminId]);
+        $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Réécrire le fichier de configuration avec le nouveau hash
-        $configFileContent = "<?php\n";
-        $configFileContent .= "// config/admin-config.php\n";
-        $configFileContent .= "\$hashedAdminPassword = '$newPasswordHash';\n";
+        // Validation des mots de passe
+        if (!$admin || !password_verify($currentPassword, $admin['password'])) {
+            $errorMessage = $translation[$language]['pass_err_current'];
+        } elseif ($newPassword !== $confirmNewPassword) {
+            $errorMessage = $translation[$language]['pass_err_match'];
+        } elseif (strlen($newPassword) < 6) {
+            $errorMessage = $translation[$language]['pass_err_short'];
+        } elseif ($currentPassword === $newPassword) {
+            $errorMessage = $translation[$language]['pass_err_same'];
+        } else {
+            // Hasher le nouveau mot de passe
+            $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
 
-        $configFilePath = __DIR__ . '/../config/admin-config.php';
-        if (file_put_contents($configFilePath, $configFileContent)) {
-            $successMessage = $translation[$language]['pass_success'];
+            // Mettre à jour la base de données
+            $updateStmt = $db->prepare("UPDATE admins SET password = :password WHERE id = :id");
+            if ($updateStmt->execute(['password' => $newPasswordHash, 'id' => $adminId])) {
+                $successMessage = $translation[$language]['pass_success'];
+            }
         }
+    } catch (PDOException $e) {
+        $errorMessage = "Erreur de base de données.";
     }
 }
 ?>
@@ -103,7 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="post">
-            <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
             <div class="form-group">
                 <label for="current_password"><?php echo htmlspecialchars($translation[$language]['pass_current']); ?></label>
                 <input type="password" id="current_password" name="current_password" required>
