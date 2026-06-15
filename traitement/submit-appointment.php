@@ -68,32 +68,7 @@ if (strlen($patientMessage) > 500) {
     $validationErrors[] = ($language === 'ar') ? "يجب ألا تتجاوز الرسالة 500 حرف." : "Le message ne doit pas dépasser 500 caractères.";
 }
 
-// Traitement sécurisé du document médical téléversé (optionnel)
 $uploadedDocumentPath = null;
-if (isset($_FILES['medical_document']) && $_FILES['medical_document']['error'] === UPLOAD_ERR_OK) {
-    $temporaryFilePath = $_FILES['medical_document']['tmp_name'];
-    $originalFileName = $_FILES['medical_document']['name'];
-    $fileSizeInBytes = $_FILES['medical_document']['size'];
-
-    // Autoriser uniquement les fichiers PDF, JPG, JPEG et PNG de moins de 5 Mo
-    $allowedFileExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
-    $uploadedFileExtension = strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION));
-
-    if (in_array($uploadedFileExtension, $allowedFileExtensions) && $fileSizeInBytes < 5000000) {
-        $uploadDirectory = __DIR__ . '/../uploads/';
-        if (!is_dir($uploadDirectory)) {
-            mkdir($uploadDirectory, 0755, true);
-        }
-        $uniqueFileName = uniqid() . '.' . $uploadedFileExtension;
-        $destinationFilePath = $uploadDirectory . $uniqueFileName;
-
-        if (move_uploaded_file($temporaryFilePath, $destinationFilePath)) {
-            $uploadedDocumentPath = 'uploads/' . $uniqueFileName;
-        }
-    } else {
-        $validationErrors[] = ($language === 'ar') ? "الملف غير صالح. يجب أن يكون PDF أو JPG أو PNG وأقل من 5 ميغابايت." : "Fichier invalide. Il doit être au format PDF, JPG ou PNG et faire moins de 5 Mo.";
-    }
-}
 
 if (count($validationErrors) > 0) {
     $_SESSION['form_errors'] = $validationErrors;
@@ -168,8 +143,8 @@ try {
     $publicAccessToken = bin2hex(random_bytes(32));
 
     // Insérer le rendez-vous dans la base de données
-    $insertQuery = $databaseConnection->prepare("INSERT INTO appointments (name, email, phone, cni, service_type, appointment_date, service_id, time_slot_id, medical_document, reference_number, public_token, message, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-    $insertQuery->execute([$patientName, $patientEmail, $patientPhone, $patientCni, $serviceTypeName, $appointmentDate, $serviceId, $timeSlotId, $uploadedDocumentPath, $referenceNumber, $publicAccessToken, $patientMessage]);
+    $insertQuery = $databaseConnection->prepare("INSERT INTO appointments (name, email, phone, cni, service_type, appointment_date, service_id, time_slot_id, reference_number, public_token, message, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+    $insertQuery->execute([$patientName, $patientEmail, $patientPhone, $patientCni, $serviceTypeName, $appointmentDate, $serviceId, $timeSlotId, $referenceNumber, $publicAccessToken, $patientMessage]);
 
     $newAppointmentId = $databaseConnection->lastInsertId();
 

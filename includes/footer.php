@@ -51,9 +51,9 @@ $translation = [
                     </div>
                     <p><?php echo $translation[$language]['desc']; ?></p>
                     <div class="social-links">
-                        <a href="#" class="social-link" aria-label="Facebook"><i class="fa-brands fa-facebook" style="font-size: 1.2rem;"></i></a>
-                        <a href="#" class="social-link" aria-label="Instagram"><i class="fa-brands fa-instagram" style="font-size: 1.2rem;"></i></a>
-                        <a href="#" class="social-link" aria-label="LinkedIn"><i class="fa-brands fa-linkedin" style="font-size: 1.2rem;"></i></a>
+                        <a href="#" class="social-link" aria-label="Facebook"><i class="fa-brands fa-facebook social-link-icon"></i></a>
+                        <a href="#" class="social-link" aria-label="Instagram"><i class="fa-brands fa-instagram social-link-icon"></i></a>
+                        <a href="#" class="social-link" aria-label="LinkedIn"><i class="fa-brands fa-linkedin social-link-icon"></i></a>
                     </div>
                 </div>
 
@@ -92,12 +92,12 @@ $translation = [
 
     <!-- Back to top -->
     <button class="back-top" id="backToTop" aria-label="<?php echo ($language === 'ar') ? 'العودة إلى الأعلى' : 'Retour en haut'; ?>">
-        <i class="fa-solid fa-chevron-up" style="font-size: 1.2rem;"></i>
+        <i class="fa-solid fa-chevron-up footer-scroll-icon"></i>
     </button>
 
     <!-- WhatsApp floating button -->
     <a href="https://wa.me/212609811095" class="whatsapp-float" target="_blank" aria-label="<?php echo ($language === 'ar') ? 'تواصل عبر واتساب' : 'Contacter via WhatsApp'; ?>">
-        <i class="fa-brands fa-whatsapp" style="font-size: 1.5rem;"></i>
+        <i class="fa-brands fa-whatsapp footer-whatsapp-icon"></i>
     </a>
 
     <script src="assets/js/main.js"></script>

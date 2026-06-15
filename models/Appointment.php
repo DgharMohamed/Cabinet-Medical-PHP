@@ -62,7 +62,6 @@ class Appointment {
             $this->created_at = $resultRow['created_at'];
             $this->service_id = $resultRow['service_id'];
             $this->time_slot_id = $resultRow['time_slot_id'];
-            $this->medical_document = $resultRow['medical_document'];
             $this->reference_number = $resultRow['reference_number'];
             $this->public_token = $resultRow['public_token'] ?? null;
             $this->service_name = $resultRow['service_name'] ?? null;

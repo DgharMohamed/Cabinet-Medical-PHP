@@ -88,7 +88,7 @@ $preparedStatement = $databaseConnection->prepare($sqlQuery);
 $preparedStatement->execute($queryParameters);
 $allAppointments = $preparedStatement->fetchAll(PDO::FETCH_ASSOC);
 
-function translateStatus($status, $language) {
+function translateStatus(string $status, string $language): string {
     if ($language === 'ar') {
         $statusMap = [
             'pending' => 'في الانتظار',
@@ -105,7 +105,7 @@ function translateStatus($status, $language) {
     return $statusMap[$status] ?? $status;
 }
 
-function getStatusColorClass($status) {
+function getStatusColorClass(string $status): string {
     $colorMap = [
         'pending' => 'status-pending',
         'confirmed' => 'status-confirmed',
@@ -137,87 +137,33 @@ foreach ($allAppointments as $app) {
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/admin.css">
-    <style>
-        /* Small overrides to perfectly match the image */
-        body { background: #f4f6f2; }
-        
-        .stat-card.stat-rdv .stat-icon { background: #e8f5e9; color: #16a34a; }
-        .stat-card.stat-avenir .stat-icon { background: #e0f2fe; color: #3b82f6; }
-        .stat-card.stat-today .stat-icon { background: #fdf2f8; color: #db2777; }
-        .stat-card.stat-services-count .stat-icon { background: #fef3c7; color: #d97706; }
-        
-        .btn-nav-primary {
-            background: #C4A052; /* Gold/Orange color from mockup */
-            color: #fff;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-nav-primary:hover { background: #AD8A3A; color: #fff; }
-
-        .service-card {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            margin-bottom: 30px;
-        }
-        .service-card .card-header {
-            border-bottom: none;
-            padding: 20px 24px;
-            background: #fff;
-            border-radius: 12px 12px 0 0;
-        }
-        .service-card table th {
-            background: #1B4D3E; /* Dark green header */
-            color: white;
-            font-size: 11px;
-            padding: 14px 24px;
-            border-bottom: none;
-        }
-        .service-card table td {
-            background: #fff;
-            padding: 20px 24px;
-            border-bottom: 1px solid #f1f5f1;
-        }
-        .service-card table tr:last-child td {
-            border-bottom: none;
-            border-radius: 0 0 12px 12px; /* if it's the last row */
-        }
-    </style>
 </head>
 <body>
     
     <div class="header">
         <div class="header-brand">
-            <i class="fa-solid fa-heart-pulse" style="color:#C4A052; font-size: 22px;"></i>
-            <h1 style="margin:0; font-size:20px;"><?php echo htmlspecialchars($translation[$language]['brand'] ?? 'Cabinet Dr. Dghar Mohamed'); ?></h1>
+            <i class="fa-solid fa-heart-pulse header-brand-icon"></i>
+            <h1 class="header-brand-title"><?php echo htmlspecialchars($translation[$language]['brand'] ?? 'Cabinet Dr. Dghar Mohamed'); ?></h1>
         </div>
         <div class="header-actions">
             <!-- Gérer les horaires -->
-            <a href="schedule.php" class="btn-nav" style="background:#fff; color:#1B4D3E; border:none; padding:10px 20px; font-weight:700; border-radius:8px; display:inline-flex; align-items:center; gap:8px; text-decoration:none;">
+            <a href="schedule.php" class="btn-nav btn-nav-light">
                 <i class="fa-solid fa-calendar-days"></i>
                 <?php echo ($language === 'ar') ? 'إدارة المواعيد' : 'Gérer les horaires'; ?>
             </a>
 
             <!-- Switch Language (AR/FR) -->
-            <a href="#" onclick="document.cookie='lang=<?php echo ($language==='fr')?'ar':'fr'; ?>; path=/'; window.location.reload(); return false;" class="btn-nav" style="background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.25); padding:10px 16px; border-radius:8px; font-weight:700; text-decoration:none;">
+            <a href="#" onclick="document.cookie='lang=<?php echo ($language==='fr')?'ar':'fr'; ?>; path=/'; window.location.reload(); return false;" class="btn-nav btn-nav-outline">
                 <?php echo ($language === 'fr') ? 'AR' : 'FR'; ?>
             </a>
 
             <!-- Change Password -->
-            <a href="change-password.php" class="btn-nav" style="background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.25); padding:10px 16px; border-radius:8px; text-decoration:none;">
+            <a href="change-password.php" class="btn-nav btn-nav-outline">
                 <i class="fa-solid fa-key"></i>
             </a>
 
             <!-- Déconnexion -->
-            <a href="logout.php" class="btn-nav" style="background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.25); padding:10px 20px; border-radius:8px; font-weight:600; text-decoration:none;">
+            <a href="logout.php" class="btn-nav btn-nav-outline-logout">
                 <?php echo $t_logout; ?>
             </a>
         </div>
@@ -226,7 +172,7 @@ foreach ($allAppointments as $app) {
     <div class="container">
         
         <?php if(isset($_SESSION['success'])): ?>
-            <div class="alert alert-success" style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;">
+            <div class="alert alert-success alert-success-custom">
                 <i class="fa-solid fa-circle-check"></i>
                 <?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
             </div>
@@ -241,7 +187,7 @@ foreach ($allAppointments as $app) {
 
         <!-- Statistics Cards -->
         <div class="stats">
-            <div class="stat-card stat-rdv" style="border:none; box-shadow:0 4px 15px rgba(0,0,0,0.03); border-radius:12px;">
+            <div class="stat-card stat-rdv stat-card-custom">
                 <div class="stat-info">
                     <span class="stat-value"><?php echo $dashboardStatistics['total']; ?></span>
                     <span class="stat-label"><?php echo $t_appointments; ?></span>
@@ -251,7 +197,7 @@ foreach ($allAppointments as $app) {
                 </div>
             </div>
             
-            <div class="stat-card stat-avenir" style="border:none; box-shadow:0 4px 15px rgba(0,0,0,0.03); border-radius:12px;">
+            <div class="stat-card stat-avenir stat-card-custom">
                 <div class="stat-info">
                     <span class="stat-value"><?php echo $dashboardStatistics['pending']; ?></span>
                     <span class="stat-label"><?php echo ($language === 'ar') ? 'القادمة' : 'À venir'; ?></span>
@@ -261,7 +207,7 @@ foreach ($allAppointments as $app) {
                 </div>
             </div>
             
-            <div class="stat-card stat-today" style="border:none; box-shadow:0 4px 15px rgba(0,0,0,0.03); border-radius:12px;">
+            <div class="stat-card stat-today stat-card-custom">
                 <div class="stat-info">
                     <span class="stat-value"><?php echo $dashboardStatistics['today']; ?></span>
                     <span class="stat-label"><?php echo $t_today; ?></span>
@@ -271,7 +217,7 @@ foreach ($allAppointments as $app) {
                 </div>
             </div>
             
-            <div class="stat-card stat-services-count" style="border:none; box-shadow:0 4px 15px rgba(0,0,0,0.03); border-radius:12px;">
+            <div class="stat-card stat-services-count stat-card-custom">
                 <div class="stat-info">
                     <span class="stat-value"><?php echo count($allServices); ?></span>
                     <span class="stat-label"><?php echo $t_total; ?></span>
@@ -283,36 +229,36 @@ foreach ($allAppointments as $app) {
         </div>
 
         <!-- Filters & Toolbar -->
-        <div class="toolbar-wrap" style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center; gap:16px;">
-            <form method="GET" class="toolbar" style="flex:1; display:flex; margin-bottom:0; box-shadow:0 4px 15px rgba(0,0,0,0.03); border:none; padding:10px 16px;">
-                <div class="search-box" style="flex:1; min-width:280px; display:flex;">
-                    <i class="fa-solid fa-magnifying-glass" style="margin-top:10px;"></i>
-                    <input type="text" name="search" placeholder="<?php echo $t_search_placeholder; ?>" value="<?php echo htmlspecialchars($searchQuery); ?>" style="border:1px solid #e2e8f0; width:100%;">
+        <div class="toolbar-wrap toolbar-wrap-custom">
+            <form method="GET" class="toolbar toolbar-custom">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" name="search" placeholder="<?php echo $t_search_placeholder; ?>" value="<?php echo htmlspecialchars($searchQuery); ?>">
                 </div>
                 
-                <select name="service" class="filter-select" style="min-width:220px; border:1px solid #e2e8f0;">
+                <select name="service" class="filter-select filter-select-custom">
                     <option value=""><?php echo $t_all_services; ?></option>
                     <?php foreach($allServices as $srv): ?>
                         <option value="<?php echo $srv['id']; ?>" <?php echo ((string)$serviceFilter === (string)$srv['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($srv['name']); ?></option>
                     <?php endforeach; ?>
                 </select>
                 
-                <button type="submit" class="btn-filter" style="padding:12px 28px;"><i class="fa-solid fa-filter" style="display:none;"></i> <?php echo $t_filter; ?></button>
+                <button type="submit" class="btn-filter btn-filter-custom"><i class="fa-solid fa-filter" style="display:none;"></i> <?php echo $t_filter; ?></button>
             </form>
 
-            <a href="create-appointment.php" class="btn-nav-primary" style="flex-shrink:0;">
+            <a href="create-appointment.php" class="btn-nav-primary btn-nav-primary-shrink">
                 <i class="fa-solid fa-plus"></i> <?php echo $t_new_appointment; ?>
             </a>
         </div>
 
         <!-- Tab Bar -->
-        <div class="tab-bar" style="border-bottom:none; margin-bottom: 24px;">
+        <div class="tab-bar tab-bar-custom">
             <button type="button" class="tab-btn active" onclick="filterByTab('all', this)">
-                <i class="fa-solid fa-list" style="margin-right:6px;"></i> <?php echo $t_tab_all; ?>
+                <i class="fa-solid fa-list tab-icon-margin"></i> <?php echo $t_tab_all; ?>
             </button>
             <?php foreach (array_keys($groupedAppointments) as $serviceName): ?>
-                <button type="button" class="tab-btn" onclick="filterByTab('<?php echo md5($serviceName); ?>', this)" style="background:#fff;">
-                    <i class="fa-solid fa-briefcase-medical" style="color:#64748b; margin-right:6px;"></i> <?php echo htmlspecialchars($serviceName); ?>
+                <button type="button" class="tab-btn tab-btn-custom" onclick="filterByTab('<?php echo md5($serviceName); ?>', this)">
+                    <i class="fa-solid fa-briefcase-medical tab-icon-custom"></i> <?php echo htmlspecialchars($serviceName); ?>
                 </button>
             <?php endforeach; ?>
         </div>
@@ -333,96 +279,90 @@ foreach ($allAppointments as $app) {
             ?>
             <div class="card service-card service-group-card" id="group-<?php echo $groupId; ?>">
                 <div class="card-header">
-                    <h3 class="card-title" style="margin:0; font-size:16px;">
-                        <i class="fa-solid fa-briefcase-medical" style="color:#1B4D3E; margin-right:8px;"></i> 
+                    <h3 class="card-title card-title-custom">
+                        <i class="fa-solid fa-briefcase-medical card-title-icon"></i> 
                         <?php echo htmlspecialchars($serviceName); ?> 
-                        <span style="color:#859485; font-weight:400; font-size:14px;">(<?php echo count($appointments); ?>)</span>
+                        <span class="card-title-count-custom">(<?php echo count($appointments); ?>)</span>
                     </h3>
                 </div>
                 <div class="table-wrap">
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 25%;"><?php echo $t_patient; ?></th>
-                                <th style="width: 15%;"><?php echo $t_rendezvous; ?></th>
-                                <th style="width: 12%;"><?php echo $t_reference; ?></th>
-                                <th style="width: 15%;"><?php echo $t_message; ?></th>
-                                <th style="width: 10%;"><?php echo $t_date; ?></th>
-                                <th style="width: 10%;"><?php echo $t_status; ?></th>
-                                <th style="width: 13%;" class="actions-col"><?php echo $t_actions; ?></th>
+                                <th class="col-patient"><?php echo $t_patient; ?></th>
+                                <th class="col-rdv"><?php echo $t_rendezvous; ?></th>
+                                <th class="col-ref"><?php echo $t_reference; ?></th>
+                                <th class="col-msg"><?php echo $t_message; ?></th>
+                                <th class="col-date"><?php echo $t_date; ?></th>
+                                <th class="col-status"><?php echo $t_status; ?></th>
+                                <th class="col-actions actions-col"><?php echo $t_actions; ?></th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach($appointments as $appointmentData): ?>
                             <tr class="table-row">
                                 <td>
-                                    <div class="patient-name" style="font-size:15px; margin-bottom:4px;"><?php echo htmlspecialchars($appointmentData['name']); ?></div>
-                                    <div class="patient-meta" style="margin-bottom:2px;">
+                                    <div class="patient-name patient-name-custom"><?php echo htmlspecialchars($appointmentData['name']); ?></div>
+                                    <div class="patient-meta patient-meta-custom">
                                         <span class="patient-meta-item"><i class="fa-regular fa-id-card"></i> <?php echo htmlspecialchars($appointmentData['cni']); ?></span> • 
-                                        <span class="patient-meta-item"><i class="fa-solid fa-phone" style="font-size:10px;"></i> <?php echo htmlspecialchars($appointmentData['phone']); ?></span>
+                                        <span class="patient-meta-item"><i class="fa-solid fa-phone phone-icon-custom"></i> <?php echo htmlspecialchars($appointmentData['phone']); ?></span>
                                     </div>
                                     <div class="patient-email">
                                         <i class="fa-regular fa-envelope"></i> <?php echo htmlspecialchars($appointmentData['email']); ?>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="rdv-info" style="gap:8px;">
-                                        <div class="badge badge-date" style="background:#f8fafc; border:1px solid #e2e8f0; color:#1e293b; padding:6px 10px; font-weight:500;">
-                                            <i class="fa-regular fa-calendar-check" style="color:#1B4D3E;"></i> <?php echo date('d/m/Y', strtotime($appointmentData['appointment_date'])); ?>
+                                    <div class="rdv-info rdv-info-custom">
+                                        <div class="badge badge-date badge-date-custom">
+                                            <i class="fa-regular fa-calendar-check calendar-icon-custom"></i> <?php echo date('d/m/Y', strtotime($appointmentData['appointment_date'])); ?>
                                         </div>
                                         <?php if($appointmentData['slot_start']): ?>
-                                        <div class="badge badge-date" style="background:transparent; border:none; padding:0; color:#0f172a; font-weight:600; padding-left:2px;">
-                                            <i class="fa-regular fa-clock" style="color:#1B4D3E;"></i> <?php echo substr($appointmentData['slot_start'], 0, 5) . ' - ' . substr($appointmentData['slot_end'], 0, 5); ?>
+                                        <div class="badge badge-date badge-time-custom">
+                                            <i class="fa-regular fa-clock calendar-icon-custom"></i> <?php echo substr($appointmentData['slot_start'], 0, 5) . ' - ' . substr($appointmentData['slot_end'], 0, 5); ?>
                                         </div>
                                         <?php endif; ?>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="ref-number" style="font-size:11px; letter-spacing:0.5px;"><?php echo htmlspecialchars($appointmentData['reference_number'] ?? 'N/A'); ?></div>
+                                    <div class="ref-number ref-number-custom"><?php echo htmlspecialchars($appointmentData['reference_number'] ?? 'N/A'); ?></div>
                                 </td>
                                 <td>
                                     <?php if(!empty($appointmentData['message'])): ?>
-                                        <div class="message-text" style="background:#f8fafc; border:1px solid #f1f5f9; color:#475569; font-size:12px; padding:8px 12px; border-radius:10px;">
-                                            <i class="fa-solid fa-comment-dots" style="color:#94a3b8; margin-right:6px;"></i><?php echo htmlspecialchars($appointmentData['message']); ?>
+                                        <div class="message-text message-text-custom">
+                                            <i class="fa-solid fa-comment-dots message-icon-custom"></i><?php echo htmlspecialchars($appointmentData['message']); ?>
                                         </div>
                                     <?php else: ?>
                                         <span class="no-msg">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <div style="background:#f8fafc; display:inline-block; padding:6px 10px; border-radius:6px; font-size:12px; font-weight:500; color:#334155;">
+                                    <div class="date-created-custom">
                                         <?php echo date('d/m/Y H:i', strtotime($appointmentData['created_at'])); ?>
                                     </div>
                                 </td>
                                 <td>
-                                    <!-- Interactive Status Dropdown -->
-                                    <form action="update-status.php" method="POST" style="margin:0;">
-                                        <input type="hidden" name="id" value="<?php echo $appointmentData['id']; ?>">
-                                        <select name="status" class="status-badge <?php echo getStatusColorClass($appointmentData['status']); ?>" onchange="this.form.submit()">
-                                            <option value="pending" <?php echo $appointmentData['status']==='pending' ? 'selected':''; ?>><?php echo translateStatus('pending', $language); ?></option>
-                                            <option value="confirmed" <?php echo $appointmentData['status']==='confirmed' ? 'selected':''; ?>><?php echo translateStatus('confirmed', $language); ?></option>
-                                            <option value="canceled" <?php echo $appointmentData['status']==='canceled' ? 'selected':''; ?>><?php echo translateStatus('canceled', $language); ?></option>
-                                        </select>
-                                    </form>
+                                    <span class="status-badge <?php echo getStatusColorClass($appointmentData['status']); ?>">
+                                        <?php echo translateStatus($appointmentData['status'], $language); ?>
+                                    </span>
                                 </td>
                                 <td class="actions-col">
                                     <div class="action-group">
                                         <!-- Inline Action Buttons -->
-                                        <?php if($appointmentData['status'] === 'pending'): ?>
-                                            <form action="update-status.php" method="POST" style="margin:0;">
+                                        <?php if($appointmentData['status'] === 'pending' || $appointmentData['status'] === 'canceled'): ?>
+                                            <form action="update-status.php" method="POST" class="form-margin-0">
                                                 <input type="hidden" name="id" value="<?php echo $appointmentData['id']; ?>">
                                                 <button type="submit" name="status" value="confirmed" class="btn-action-confirm"><i class="fa-solid fa-check"></i> <?php echo $t_confirm; ?></button>
                                             </form>
                                         <?php endif; ?>
 
                                         <?php if($appointmentData['status'] !== 'canceled'): ?>
-                                            <form action="update-status.php" method="POST" style="margin:0;">
+                                            <form action="update-status.php" method="POST" class="form-margin-0">
                                                 <input type="hidden" name="id" value="<?php echo $appointmentData['id']; ?>">
                                                 <button type="submit" name="status" value="canceled" class="btn-action-cancel"><i class="fa-solid fa-xmark"></i> <?php echo $t_cancel; ?></button>
                                             </form>
                                         <?php endif; ?>
                                         
-                                        <form action="update-status.php" method="POST" style="margin:0;" onsubmit="return confirm('<?php echo addslashes($t_confirm_delete); ?>');">
+                                        <form action="update-status.php" method="POST" class="form-margin-0" onsubmit="return confirm('<?php echo addslashes($t_confirm_delete); ?>');">
                                             <input type="hidden" name="id" value="<?php echo $appointmentData['id']; ?>">
                                             <button type="submit" name="delete" value="1" class="btn-action-delete" title="<?php echo $t_delete_permanent; ?>"><i class="fa-solid fa-trash"></i></button>
                                         </form>

@@ -930,22 +930,13 @@ html[dir="rtl"] .message-text svg { margin-right: 0; margin-left: 4px; }
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: default;
   border: 1px solid transparent;
   transition: all 0.2s;
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-  background-repeat: no-repeat;
-  background-position: right .7em top 50%;
-  background-size: .65em auto;
-  padding-right: 24px;
 }
 
 html[dir="rtl"] .status-badge {
-  background-position: left .7em top 50%;
-  padding-right: 10px;
-  padding-left: 24px;
+  padding-left: 10px;
 }
 
 .status-pending   { background-color: #FEF3C7; color: #D97706; border-color: #FDE68A; }
@@ -955,6 +946,8 @@ html[dir="rtl"] .status-badge {
 .status-canceled  { background-color: #FEE2E2; color: #DC2626; border-color: #FECACA; }
 
 .status-badge:hover { opacity: 0.8; }
+
+
 
 /* ----------------------------------------------------------
    18. PAGINATION
@@ -1314,3 +1307,446 @@ html[dir="rtl"] .modal-footer { justify-content: flex-start; }
 
   .modal-body .detail-label { width: auto; }
 }
+
+/* ==========================================================================
+   24. EXTRACTED UTILITY CLASSES (From Inline Styles)
+   ========================================================================== */
+.schedule-card-padded {
+    padding: 20px;
+}
+
+.schedule-section-title {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #1B4D3E;
+}
+
+.schedule-tabs-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 15px;
+}
+
+.capacity-input {
+    background: rgba(22, 163, 74, 0.08);
+    border: 1px solid rgba(22, 163, 74, 0.15);
+    color: #1B4D3E;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    outline: none;
+    font-size: 13px;
+    text-align: center;
+    width: 65px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.empty-day-cell {
+    text-align: center;
+    color: #6b806b;
+    padding: 25px;
+}
+
+.empty-table-cell {
+    text-align: center;
+    color: #6b806b;
+}
+
+.btn-delete-red {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.btn-submit-red {
+    background: #b91c1c;
+}
+
+.schedule-grid-margin {
+    margin-top: 30px;
+}
+
+/* ==========================================================================
+   25. INDEX.PHP EXTRACTED STYLES
+   ========================================================================== */
+
+/* Header */
+.header-brand-icon {
+    color: #C4A052;
+    font-size: 22px;
+}
+
+.header-brand-title {
+    margin: 0;
+    font-size: 20px;
+}
+
+.btn-nav-light {
+    background: #fff;
+    color: #1B4D3E;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 700;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-nav-outline {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.btn-nav-outline-logout {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Alerts */
+.alert-success-custom {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+/* Stats */
+.stat-card-custom {
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+}
+
+/* Toolbar */
+.toolbar-wrap-custom {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.toolbar-custom {
+    flex: 1;
+    display: flex;
+    margin-bottom: 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    border: none;
+    padding: 10px 16px;
+}
+
+.search-box-custom {
+    flex: 1;
+    min-width: 280px;
+    display: flex;
+}
+
+.search-icon-custom {
+    margin-top: 10px;
+}
+
+.search-input-custom {
+    border: 1px solid #e2e8f0;
+    width: 100%;
+}
+
+.filter-select-custom {
+    min-width: 220px;
+    border: 1px solid #e2e8f0;
+}
+
+.btn-filter-custom {
+    padding: 12px 28px;
+}
+
+.btn-nav-primary-shrink {
+    flex-shrink: 0;
+}
+
+/* Tabs */
+.tab-bar-custom {
+    border-bottom: none;
+    margin-bottom: 24px;
+}
+
+.tab-icon-margin {
+    margin-right: 6px;
+}
+
+.tab-btn-custom {
+    background: #fff;
+}
+
+.tab-icon-custom {
+    color: #64748b;
+    margin-right: 6px;
+}
+
+/* Cards */
+.card-title-custom {
+    margin: 0;
+    font-size: 16px;
+}
+
+.card-title-icon {
+    color: #1B4D3E;
+    margin-right: 8px;
+}
+
+.card-title-count-custom {
+    color: #859485;
+    font-weight: 400;
+    font-size: 14px;
+}
+
+/* Table */
+.col-patient { width: 25%; }
+.col-rdv { width: 15%; }
+.col-ref { width: 12%; }
+.col-msg { width: 15%; }
+.col-date { width: 10%; }
+.col-status { width: 10%; }
+.col-actions { width: 13%; }
+
+.patient-name-custom {
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.patient-meta-custom {
+    margin-bottom: 2px;
+}
+
+.phone-icon-custom {
+    font-size: 10px;
+}
+
+.rdv-info-custom {
+    gap: 8px;
+}
+
+.badge-date-custom {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+    padding: 6px 10px;
+    font-weight: 500;
+}
+
+.calendar-icon-custom {
+    color: #1B4D3E;
+}
+
+.badge-time-custom {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: #0f172a;
+    font-weight: 600;
+    padding-left: 2px;
+}
+
+.ref-number-custom {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+
+.message-text-custom {
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    color: #475569;
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+
+.message-icon-custom {
+    color: #94a3b8;
+    margin-right: 6px;
+}
+
+.date-created-custom {
+    background: #f8fafc;
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #334155;
+}
+
+.form-margin-0 {
+    margin: 0;
+}
+
+/* Overrides from style tag */
+body { background: #f4f6f2; }
+
+.stat-card.stat-rdv .stat-icon { background: #e8f5e9; color: #16a34a; }
+.stat-card.stat-avenir .stat-icon { background: #e0f2fe; color: #3b82f6; }
+.stat-card.stat-today .stat-icon { background: #fdf2f8; color: #db2777; }
+.stat-card.stat-services-count .stat-icon { background: #fef3c7; color: #d97706; }
+
+.btn-nav-primary {
+    background: #C4A052; /* Gold/Orange color from mockup */
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-nav-primary:hover { background: #AD8A3A; color: #fff; }
+
+.service-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    margin-bottom: 30px;
+}
+.service-card .card-header {
+    border-bottom: none;
+    padding: 20px 24px;
+    background: #fff;
+    border-radius: 12px 12px 0 0;
+}
+.service-card table th {
+    background: #1B4D3E; /* Dark green header */
+    color: white;
+    font-size: 11px;
+    padding: 14px 24px;
+    border-bottom: none;
+}
+.service-card table td {
+    background: #fff;
+    padding: 20px 24px;
+    border-bottom: 1px solid #f1f5f1;
+}
+.service-card table tr:last-child td {
+    border-bottom: none;
+}
+
+/* ==========================================================================
+   26. CREATE APPOINTMENT EXTRACTED STYLES
+   ========================================================================== */
+.form-wrap { max-width: 600px; margin: 40px auto; padding: 32px; background: white; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+.form-wrap h1 { font-size: 22px; font-weight: 700; color: #1B4D3E; margin-bottom: 24px; }
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-size: 14px; font-weight: 600; color: #4a5c4a; margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid #d0dbd0; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #1B4D3E; box-shadow: 0 0 0 3px rgba(27,77,62,0.1); }
+.btn-submit { background: #1B4D3E; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; }
+.btn-submit:hover { background: #143a2e; }
+.back-link { display: inline-block; margin-top: 16px; color: #1B4D3E; text-decoration: none; font-size: 14px; }
+.error-msg { background: #fef2f2; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #fecaca; }
+
+/* ==========================================================================
+   27. ADMIN INDEX EXTRACTED STYLES
+   ========================================================================== */
+/* Original style block from index.php */
+.stat-card.stat-rdv .stat-icon { background: #e8f5e9; color: #16a34a; }
+.stat-card.stat-avenir .stat-icon { background: #e0f2fe; color: #3b82f6; }
+.stat-card.stat-today .stat-icon { background: #fdf2f8; color: #db2777; }
+.stat-card.stat-services-count .stat-icon { background: #fef3c7; color: #d97706; }
+
+.btn-nav-primary {
+    background: #C4A052; /* Gold/Orange color from mockup */
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-nav-primary:hover { background: #AD8A3A; color: #fff; }
+
+.service-card { border-radius: 12px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 30px; }
+.service-card .card-header { border-bottom: none; padding: 20px 24px; background: #fff; border-radius: 12px 12px 0 0; }
+.service-card table th { background: #1B4D3E; color: white; font-size: 11px; padding: 14px 24px; border-bottom: none; }
+.service-card table td { background: #fff; padding: 20px 24px; border-bottom: 1px solid #f1f5f1; }
+.service-card table tr:last-child td { border-bottom: none; border-radius: 0 0 12px 12px; }
+
+/* Header Utilities */
+.header-brand-icon { color: #C4A052; font-size: 22px; }
+.header-brand-title { margin: 0; font-size: 20px; }
+.btn-nav-light { background: #fff; color: #1B4D3E; border: none; padding: 10px 20px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+.btn-nav-outline { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.25); padding: 10px 16px; border-radius: 8px; font-weight: 700; text-decoration: none; }
+.btn-nav-outline-logout { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.25); padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; }
+
+/* Dashboard Utilities */
+.alert-success-custom { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.stat-card-custom { border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border-radius: 12px; }
+
+/* Toolbar & Filters Utilities */
+.toolbar-wrap-custom { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.toolbar-custom { flex: 1; display: flex; margin-bottom: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: none; padding: 10px 16px; }
+.search-box-custom { flex: 1; min-width: 280px; display: flex; }
+.search-icon-custom { margin-top: 10px; }
+.search-input-custom { border: 1px solid #e2e8f0; width: 100%; }
+.filter-select-custom { min-width: 220px; border: 1px solid #e2e8f0; }
+.btn-filter-custom { padding: 12px 28px; }
+.btn-nav-primary-shrink { flex-shrink: 0; }
+
+/* Tabs Utilities */
+.tab-bar-custom { border-bottom: none; margin-bottom: 24px; }
+.tab-icon-margin { margin-right: 6px; }
+.tab-btn-custom { background: #fff; }
+.tab-icon-custom { color: #64748b; margin-right: 6px; }
+
+/* Table and Card Title Utilities */
+.card-title-custom { margin: 0; font-size: 16px; }
+.card-title-icon { color: #1B4D3E; margin-right: 8px; }
+.card-title-count-custom { color: #859485; font-weight: 400; font-size: 14px; }
+.col-patient { width: 25%; }
+.col-rdv { width: 15%; }
+.col-ref { width: 12%; }
+.col-msg { width: 15%; }
+.col-date { width: 10%; }
+.col-status { width: 10%; }
+.col-actions { width: 13%; }
+.patient-name-custom { font-size: 15px; margin-bottom: 4px; }
+.patient-meta-custom { margin-bottom: 2px; }
+.phone-icon-custom { font-size: 10px; }
+.rdv-info-custom { gap: 8px; }
+.badge-date-custom { background: #f8fafc; border: 1px solid #e2e8f0; color: #1e293b; padding: 6px 10px; font-weight: 500; }
+.calendar-icon-custom { color: #1B4D3E; }
+.badge-time-custom { background: transparent; border: none; padding: 0; color: #0f172a; font-weight: 600; padding-left: 2px; }
+.ref-number-custom { font-size: 11px; letter-spacing: 0.5px; }
+.message-text-custom { background: #f8fafc; border: 1px solid #f1f5f9; color: #475569; font-size: 12px; padding: 8px 12px; border-radius: 10px; }
+.message-icon-custom { color: #94a3b8; margin-right: 6px; }
+.date-created-custom { background: #f8fafc; display: inline-block; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; color: #334155; }
+.form-margin-0 { margin: 0; }
+
+

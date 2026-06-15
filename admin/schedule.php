@@ -206,8 +206,8 @@ $allExceptions = $exceptionsQuery->fetchAll(PDO::FETCH_ASSOC);
         <?php endif; ?>
 
         <div class="schedule-grid">
-            <div class="card" style="padding: 20px;">
-                <h2 style="font-size:18px;margin-bottom:20px;color:#1B4D3E;">
+            <div class="card schedule-card-padded">
+                <h2 class="schedule-section-title">
                     <i class="fa-solid fa-plus-circle"></i> <?php echo htmlspecialchars($translation[$language]['add_slot']); ?>
                 </h2>
                 <form method="post" action="schedule.php">
@@ -236,8 +236,8 @@ $allExceptions = $exceptionsQuery->fetchAll(PDO::FETCH_ASSOC);
                 </form>
             </div>
 
-            <div class="card" style="padding: 20px;">
-                <div class="schedule-tabs" style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">
+            <div class="card schedule-card-padded">
+                <div class="schedule-tabs schedule-tabs-container">
                     <?php
                     $workingDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                     foreach ($workingDays as $workingDay):
@@ -257,13 +257,13 @@ $allExceptions = $exceptionsQuery->fetchAll(PDO::FETCH_ASSOC);
                                 <th><?php echo htmlspecialchars($translation[$language]['start_time']); ?></th>
                                 <th><?php echo htmlspecialchars($translation[$language]['end_time']); ?></th>
                                 <th><?php echo htmlspecialchars($translation[$language]['max_patients']); ?></th>
-                                <th style="text-align:center;"><?php echo htmlspecialchars($translation[$language]['actions']); ?></th>
+                                <th class="text-center"><?php echo htmlspecialchars($translation[$language]['actions']); ?></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr id="empty-day-row" style="display: none;">
-                                <td colspan="5" style="text-align:center;color:#6b806b;padding:25px;">
-                                    <i class="fa-solid fa-calendar-xmark" style="font-size:1.5rem;margin-bottom:10px;display:block;color:#cbd5e1;"></i>
+                                <td colspan="5" class="empty-day-cell">
+                                    <i class="fa-solid fa-calendar-xmark empty-icon"></i>
                                     <?php echo htmlspecialchars($translation[$language]['empty']); ?>
                                 </td>
                             </tr>
@@ -275,7 +275,7 @@ $allExceptions = $exceptionsQuery->fetchAll(PDO::FETCH_ASSOC);
                                      <td>
                                          <select id="max-patients-<?php echo $timeSlot['id']; ?>"
                                                  onchange="updateMaxPatients(<?php echo $timeSlot['id']; ?>, this.value)"
-                                                 style="background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.15); color: #1B4D3E; font-weight: 600; padding: 4px 8px; border-radius: 6px; cursor: pointer; outline: none; font-size: 13px; text-align: center; width: 65px;">
+                                                 class="capacity-input">
                                              <?php for ($patientIndex = 1; $patientIndex <= 15; $patientIndex++): ?>
                                                  <option value="<?php echo $patientIndex; ?>" <?php echo ($patientIndex === intval($timeSlot['max_patients'])) ? 'selected' : ''; ?>>
                                                      <?php echo $patientIndex; ?>
@@ -283,8 +283,8 @@ $allExceptions = $exceptionsQuery->fetchAll(PDO::FETCH_ASSOC);
                                              <?php endfor; ?>
                                          </select>
                                      </td>
-                                    <td style="text-align:center;">
-                                        <button type="button" class="btn-delete" onclick="confirmDelete(<?php echo $timeSlot['id']; ?>)" style="background:#dc2626;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;">
+                                    <td class="text-center">
+                                        <button type="button" class="btn-delete btn-delete-red" onclick="confirmDelete(<?php echo $timeSlot['id']; ?>)">
                                             <i class="fa-solid fa-trash-can"></i> <?php echo htmlspecialchars($translation[$language]['delete']); ?>
                                         </button>
                                     </td>
@@ -296,9 +296,9 @@ $allExceptions = $exceptionsQuery->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
 
-        <div class="schedule-grid" style="margin-top: 30px;">
-            <div class="card" style="padding: 20px;">
-                <h2 style="font-size:18px;margin-bottom:20px;color:#1B4D3E;">
+        <div class="schedule-grid schedule-grid-margin">
+            <div class="card schedule-card-padded">
+                <h2 class="schedule-section-title">
                     <i class="fa-solid fa-calendar-xmark"></i> <?php echo htmlspecialchars($translation[$language]['add_exception']); ?>
                 </h2>
                 <form method="post" action="schedule.php">
@@ -325,12 +325,12 @@ $allExceptions = $exceptionsQuery->fetchAll(PDO::FETCH_ASSOC);
                         <label><?php echo htmlspecialchars($translation[$language]['reason']); ?></label>
                         <input type="text" name="reason" placeholder="...">
                     </div>
-                    <button type="submit" class="btn-submit" style="background:#b91c1c;"><?php echo htmlspecialchars($translation[$language]['add_exception']); ?></button>
+                    <button type="submit" class="btn-submit btn-submit-red"><?php echo htmlspecialchars($translation[$language]['add_exception']); ?></button>
                 </form>
             </div>
 
-            <div class="card" style="padding: 20px;">
-                <h2 style="font-size:18px;margin-bottom:20px;color:#1B4D3E;">
+            <div class="card schedule-card-padded">
+                <h2 class="schedule-section-title">
                     <i class="fa-solid fa-list"></i> <?php echo htmlspecialchars($translation[$language]['exceptions_title']); ?>
                 </h2>
                 <div class="table-wrap">
@@ -340,13 +340,13 @@ $allExceptions = $exceptionsQuery->fetchAll(PDO::FETCH_ASSOC);
                                 <th><?php echo htmlspecialchars($translation[$language]['date']); ?></th>
                                 <th><?php echo ($language === 'ar') ? "الحصة" : "Créneau"; ?></th>
                                 <th><?php echo htmlspecialchars($translation[$language]['reason']); ?></th>
-                                <th style="text-align:center;"><?php echo htmlspecialchars($translation[$language]['actions']); ?></th>
+                                <th class="text-center"><?php echo htmlspecialchars($translation[$language]['actions']); ?></th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($allExceptions)): ?>
                                 <tr>
-                                    <td colspan="4" style="text-align:center;color:#6b806b;">
+                                    <td colspan="4" class="empty-table-cell">
                                         <?php echo htmlspecialchars($translation[$language]['no_exceptions']); ?>
                                     </td>
                                 </tr>
@@ -356,18 +356,18 @@ $allExceptions = $exceptionsQuery->fetchAll(PDO::FETCH_ASSOC);
                                         <td><strong><?php echo date('Y-m-d', strtotime($exceptionRecord['exception_date'])); ?></strong></td>
                                         <td>
                                             <?php if ($exceptionRecord['time_slot_id']): ?>
-                                                <span class="badge" style="background:#e0f2fe;color:#0369a1;">
+                                                <span class="badge badge-blue">
                                                     <?php echo substr($exceptionRecord['start_time'], 0, 5) . ' - ' . substr($exceptionRecord['end_time'], 0, 5); ?>
                                                 </span>
                                             <?php else: ?>
-                                                <span class="badge" style="background:#f3f4f6;color:#374151;">
+                                                <span class="badge badge-gray">
                                                     <?php echo ($language === 'ar') ? "اليوم بأكمله" : "Toute la journée"; ?>
                                                 </span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><span class="badge" style="background:#fee2e2;color:#b91c1c;"><?php echo htmlspecialchars($exceptionRecord['reason'] ? $exceptionRecord['reason'] : '...'); ?></span></td>
-                                        <td style="text-align:center;">
-                                            <button type="button" class="btn-delete" onclick="confirmDeleteException(<?php echo $exceptionRecord['id']; ?>)" style="background:#dc2626;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;">
+                                        <td><span class="badge badge-red"><?php echo htmlspecialchars($exceptionRecord['reason'] ? $exceptionRecord['reason'] : '...'); ?></span></td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn-delete btn-delete-red" onclick="confirmDeleteException(<?php echo $exceptionRecord['id']; ?>)">
                                                 <i class="fa-solid fa-trash-can"></i> <?php echo htmlspecialchars($translation[$language]['delete']); ?>
                                             </button>
                                         </td>

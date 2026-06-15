@@ -57,12 +57,6 @@ $translation = $allTranslations[$language];
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <?php if ($language === 'ar'): ?>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Cairo', 'IBM Plex Sans Arabic', sans-serif !important; }
-        .confirm-doctor-name { font-family: 'Cairo', sans-serif !important; font-weight: 700 !important; }
-        .confirm-section-title { font-family: 'Cairo', sans-serif !important; }
-        .btn-confirm { font-family: 'Cairo', sans-serif !important; }
-    </style>
     <?php else: ?>
     <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
     <?php endif; ?>
@@ -77,7 +71,7 @@ $translation = $allTranslations[$language];
     <main class="confirm-main">
         <div class="confirm-card confirm-error">
             <div class="confirm-error-icon">
-                <i class="fa-regular fa-circle-xmark" style="font-size: 48px;"></i>
+                <i class="fa-regular fa-circle-xmark error-icon-large"></i>
             </div>
             <h1><?php echo $translation['not_found_title']; ?></h1>
             <p><?php echo $translation['not_found_desc']; ?></p>
@@ -108,17 +102,17 @@ $translation = $allTranslations[$language];
 
             <!-- QR code + reference -->
             <?php if ($appointmentDetails->reference_number): ?>
-            <div class="confirm-ref-banner" style="background:#f0f9f0;padding:12px 20px;border-radius:8px;margin:16px 0;display:flex;align-items:center;gap:16px;font-size:14px;color:#1B4D3E;font-weight:600;">
+            <div class="confirm-ref-banner confirm-ref-banner-style">
                 <div style="flex-shrink:0;">
                     <?php $qrCodeImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=' . urlencode($appointmentDetails->reference_number); ?>
-                    <img src="<?php echo htmlspecialchars($qrCodeImageUrl); ?>" alt="QR Code" width="100" height="100" style="border-radius: 4px; display: block; background: white; padding: 4px; border: 1px solid #d0dbd0;">
+                    <img src="<?php echo htmlspecialchars($qrCodeImageUrl); ?>" alt="QR Code" width="100" height="100" class="qr-code-image">
                 </div>
                 <div>
-                    <div style="margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-qrcode" style="font-size:18px;"></i>
+                    <div class="qr-code-text-container">
+                        <i class="fa-solid fa-qrcode qr-code-icon"></i>
                         <span><?php echo $translation['ref_number']; ?>: <?php echo htmlspecialchars($appointmentDetails->reference_number); ?></span>
                     </div>
-                    <p style="font-size: 13px; font-weight: 400; color: #6b806b; margin: 0;">
+                    <p class="qr-code-instructions">
                         <?php echo ($language === 'ar') ? 'يرجى الاحتفاظ برمز الاستجابة السريعة (QR Code) لتقديمه عند وصولك إلى العيادة.' : 'Veuillez conserver ce QR Code pour le présenter à votre arrivée au cabinet.'; ?>
                     </p>
                 </div>
@@ -204,16 +198,6 @@ $translation = $allTranslations[$language];
                     <div class="confirm-field confirm-field-full">
                         <span class="confirm-label"><?php echo $translation['message']; ?></span>
                         <span class="confirm-value confirm-message"><?php echo nl2br(htmlspecialchars($appointmentDetails->message)); ?></span>
-                    </div>
-                    <?php endif; ?>
-                    <?php if (!empty($appointmentDetails->medical_document)): ?>
-                    <div class="confirm-field confirm-field-full">
-                        <span class="confirm-label"><?php echo $translation['document']; ?></span>
-                        <span class="confirm-value">
-                            <a href="traitement/download-document.php?id=<?php echo $appointmentDetails->id; ?>&token=<?php echo urlencode($appointmentDetails->public_token); ?>" target="_blank" style="color:#1B4D3E;text-decoration:underline;">
-                                <i class="fa-solid fa-file"></i> <?php echo $translation['download']; ?>
-                            </a>
-                        </span>
                     </div>
                     <?php endif; ?>
                 </div>

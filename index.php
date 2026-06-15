@@ -174,11 +174,11 @@ if ($trackStatus !== '') {
             <div class="testimonials-grid">
                 <article class="testimonial-card reveal">
                     <div class="testimonial-stars">
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
                     </div>
                     <p class="testimonial-text"><?php echo $translation[$language]['t1_text']; ?></p>
                     <div class="testimonial-author">
@@ -188,11 +188,11 @@ if ($trackStatus !== '') {
                 </article>
                 <article class="testimonial-card reveal">
                     <div class="testimonial-stars">
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
                     </div>
                     <p class="testimonial-text"><?php echo $translation[$language]['t2_text']; ?></p>
                     <div class="testimonial-author">
@@ -202,11 +202,11 @@ if ($trackStatus !== '') {
                 </article>
                 <article class="testimonial-card reveal">
                     <div class="testimonial-stars">
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
-                        <i class="fa-solid fa-star" style="color:#C4A052;"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
+                        <i class="fa-solid fa-star star-rating-icon"></i>
                     </div>
                     <p class="testimonial-text"><?php echo $translation[$language]['t3_text']; ?></p>
                     <div class="testimonial-author">
@@ -295,7 +295,7 @@ if ($trackStatus !== '') {
                     </div>
 
                     <div class="map">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d206847.46467389283!2d-5.952525164871957!3d35.74100587652758!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd0b875cf04c132d%3A0x76bfc571bfb4e17a!2sTangier%2C%20Morocco!5e0!3m2!1sen!2sma!4v1778541217538!5m2!1sen!2sma" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" title="Localisation du cabinet à Tanger"></iframe>
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d206847.46467389283!2d-5.952525164871957!3d35.74100587652758!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd0b875cf04c132d%3A0x76bfc571bfb4e17a!2sTangier%2C%20Morocco!5e0!3m2!1sen!2sma!4v1778541217538!5m2!1sen!2sma" width="100%" height="100%" class="map-iframe" allowfullscreen="" loading="lazy" title="Localisation du cabinet à Tanger"></iframe>
                     </div>
                 </div>
 
@@ -318,7 +318,7 @@ if ($trackStatus !== '') {
                         <?php endif; ?>
                     <?php endif; ?>
 
-                    <form action="traitement/submit-appointment.php" method="post" enctype="multipart/form-data" id="appointmentForm">
+                    <form action="traitement/submit-appointment.php" method="post" id="appointmentForm">
                         <div class="form-group">
                             <input type="text" name="name" class="form-input" placeholder=" " required>
                             <label><?php echo $translation[$language]['name_label']; ?></label>
@@ -358,15 +358,11 @@ if ($trackStatus !== '') {
                                 <input type="date" name="appointment_date" class="form-input" placeholder=" " required id="appointmentDate">
                                 <label><?php echo $translation[$language]['date_label']; ?></label>
                             </div>
-                            <div class="form-group-slots" style="margin-bottom: var(--space-md); position: relative;">
+                            <div class="form-group-slots form-group-slots-container">
                                 <div id="time-slots-container">
-                                    <p style="color:#999;font-size:13px;padding-top:8px;"><?php echo $translation[$language]['select_date_first']; ?></p>
+                                    <p class="select-date-prompt"><?php echo $translation[$language]['select_date_first']; ?></p>
                                 </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <input type="file" name="medical_document" class="form-input" accept=".pdf,.jpg,.jpeg,.png">
-                            <label><?php echo $translation[$language]['file_label']; ?></label>
                         </div>
                         <div class="form-group">
                             <textarea name="message" class="form-input form-textarea" placeholder=" " rows="4"></textarea>

@@ -128,18 +128,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/admin.css">
-    <style>
-        .form-wrap { max-width: 600px; margin: 40px auto; padding: 32px; background: white; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
-        .form-wrap h1 { font-size: 22px; font-weight: 700; color: #1B4D3E; margin-bottom: 24px; }
-        .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; font-size: 14px; font-weight: 600; color: #4a5c4a; margin-bottom: 6px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #d0dbd0; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #1B4D3E; box-shadow: 0 0 0 3px rgba(27,77,62,0.1); }
-        .btn-submit { background: #1B4D3E; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; }
-        .btn-submit:hover { background: #143a2e; }
-        .back-link { display: inline-block; margin-top: 16px; color: #1B4D3E; text-decoration: none; font-size: 14px; }
-        .error-msg { background: #fef2f2; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #fecaca; }
-    </style>
 </head>
 <body>
     <div class="form-wrap">
@@ -192,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-group">
                 <label for="message"><?php echo htmlspecialchars($translation[$language]['create_message']); ?></label>
-                <textarea id="message" name="message" rows="3" style="width: 100%; padding: 10px 14px; border: 1px solid #d0dbd0; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box;"></textarea>
+                <textarea id="message" name="message" rows="3"></textarea>
             </div>
             <button type="submit" class="btn-submit"><?php echo htmlspecialchars($translation[$language]['create_submit']); ?></button>
         </form>

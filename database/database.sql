@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     admin_id INT DEFAULT NULL COMMENT 'Admin who managed this appointment',
     
     -- Security and Attachments
-    medical_document VARCHAR(255) DEFAULT NULL COMMENT 'File path to the uploaded medical document (if any)',
+
     reference_number VARCHAR(50) DEFAULT NULL COMMENT 'Unique reference code (e.g., APT-20260520-1479)',
     public_token VARCHAR(64) DEFAULT NULL COMMENT 'Secure token to prevent IDOR vulnerabilities (public access)',
 
